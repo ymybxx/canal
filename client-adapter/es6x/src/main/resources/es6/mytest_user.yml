@@ -11,6 +11,6 @@ esMapping:
         a.c_time as _c_time from user a
         left join role b on b.id=a.role_id"
 #  objFields:
-#    _labels: array:;
+#    _labels: array: application.yml;
   etlCondition: "where a.c_time>={}"
   commitBatch: 3000
