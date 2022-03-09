@@ -55,18 +55,28 @@ canal.conf:
   #      url: jdbc:mysql://rm-bp1yjb2rh8249f1ft90130.mysql.rds.aliyuncs.com:3306/common?useUnicode=true
   #      username: dev
   #      password: dev123456
+
   canalAdapters:
     - instance: posting_post # canal instance Name or mq topic name
       groups:
-        - groupId: canal-adapter-be
+        #        - groupId: canal-adapter-be
+        #          outerAdapters:
+        #            - name: logger
+        #            - name: es7
+        #              hosts: es-cn-nif1u0p9m000ao3fn.elasticsearch.aliyuncs.com:9200 # 127.0.0.1:9200 for rest mode
+        #              properties:
+        #                mode: rest
+        #                security.auth: elastic:Dev123456+ #  only used for rest mode
+        #                cluster.name: elasticsearch
+        - groupId: canal-adapter-ba
           outerAdapters:
             - name: logger
-            - name: es7
-              hosts: es-cn-nif1u0p9m000ao3fn.elasticsearch.aliyuncs.com:9200 # 127.0.0.1:9200 for rest mode
+            - name: redis
+              hosts: r-bp1lv6hmsmbxcmtahn.redis.rds.aliyuncs.com:6379
               properties:
-                mode: rest
-                security.auth: elastic:Dev123456+ #  only used for rest mode
-                cluster.name: elasticsearch
+                cluster: false
+                password: Dev123456
+
 #    - instance: posting_topic # canal instance Name or mq topic name
 #      groups:
 #        - groupId: canal-adapter-be
