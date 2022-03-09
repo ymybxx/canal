@@ -1,0 +1,14 @@
+dataSourceKey: postDS
+destination: posting_post
+groupId: canal-adapter-ba
+redisMapping:
+  database: posting
+  table: post
+  key: "posts:{}-{}" # 此处的 {} 会被替换为下面的 pk 对应的值
+  pk: id,channel
+  expire: -1
+  #  mapAll: true
+  targetColumns:
+    id:
+    title:
+  etlCondition: ""

@@ -1,0 +1,11 @@
+dataSourceKey: postDS
+destination: posting_topic
+groupId: canal-adapter-be
+esMapping:
+  _index: index_topic
+  _id: id
+  sql: "select id, topic_type, title, like_count, comment_count, vote_count, view_real_count, view_count, join_real_count, join_count, operate_score, publish_tm, publish_state, operate_user_id, ins_tm, upd_tm, rich_text, tag_ids, vote_type from topic"
+  etlCondition: "where upd_tm>={}"
+  commitBatch: 3000
+  objFields:
+    tagIds: array:,

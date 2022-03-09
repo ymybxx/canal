@@ -52,6 +52,13 @@
             </includes>
         </fileSet>
         <fileSet>
+            <directory>../redis/src/main/resources/redis</directory>
+            <outputDirectory>/conf/redis</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>../kudu/src/main/resources/kudu</directory>
             <outputDirectory>/conf/kudu</outputDirectory>
             <includes>
