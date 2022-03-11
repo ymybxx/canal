@@ -83,7 +83,9 @@ public class RedisMappingConfig implements AdapterConfig {
 
         private String database;                            // 数据库名或schema名
         private String table;                               // 表名
-        private String pk = null;                     // 主键名
+        private String namespace;                           // 命名空间
+        private String sql;
+        private String pk = null;                           // 主键名
         private String key;                                 // key
         private String dataType = "string";                 // 数据类型
         private int expire;                                 // 过期时间
@@ -108,6 +110,22 @@ public class RedisMappingConfig implements AdapterConfig {
 
         public void setTable(String table) {
             this.table = table;
+        }
+
+        public String getNamespace() {
+            return namespace;
+        }
+
+        public void setNamespace(String namespace) {
+            this.namespace = namespace;
+        }
+
+        public String getSql() {
+            return sql;
+        }
+
+        public void setSql(String sql) {
+            this.sql = sql;
         }
 
         public Boolean getMapAll() {

@@ -12,7 +12,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 public class RedisSyncService {
 
@@ -40,8 +39,15 @@ public class RedisSyncService {
                 logger.warn("pk can not be null");
                 return;
             }
+
+            String nameSpace = redisMapping.getNamespace();
+            if (CollectionUtils.isEmpty(pkList)) {
+                logger.warn("nameSpace can not be null");
+                return;
+            }
+
             String key = redisMapping.getKey();
-            if (searchCount(key, "{}") != pkList.size()) {
+            if (SyncUtil.searchCount(key, "{}") != pkList.size()) {
                 logger.warn("pk num don't match the key num");
                 return;
             }
@@ -58,7 +64,8 @@ public class RedisSyncService {
 
                     keyList.add(String.valueOf(pkValue));
                 }
-                String resultKey = replaceStr(key, "{}", keyList);
+                String resultKey = SyncUtil.replaceStr(key, "{}", keyList);
+                resultKey = nameSpace + ":" + resultKey;
                 Map<String, Object> values = new HashMap<>();
                 SyncUtil.getColumnsMap(redisMapping, value)
                         .forEach((targetColumn, srcColumn) -> values
@@ -75,42 +82,6 @@ public class RedisSyncService {
                 delete(dataMap);
             }
         }
-    }
-
-    private String replaceStr(String source, String regex, List<String> toColumnList) {
-        List<Integer> startIndexList = new ArrayList<>();
-        int searchIndex = 0;
-        while (true) {
-            int start = source.indexOf(regex, searchIndex);
-            if (start < 0) {
-                break;
-            }
-
-            startIndexList.add(start);
-            searchIndex = start + regex.length();
-        }
-
-        return replaceStr(source, startIndexList, regex.length(), toColumnList);
-    }
-
-    private String replaceStr(String source, List<Integer> startIndexList, Integer step,
-            List<String> toColumnList) {
-        String result = "";
-        Integer start = 0;
-        for (int i = 0; i < startIndexList.size(); i++) {
-            Integer end = startIndexList.get(i);
-            result = result + source.substring(start, end) + toColumnList.get(i);
-            start = end + step;
-        }
-
-        return result;
-    }
-
-    public Integer searchCount(String source, String target) {
-        if (source == null || target == null) {
-            return 0;
-        }
-        return StringUtils.countOccurrencesOf(source, target);
     }
 
     private void update(Map<String, String> dataMap, int expire) {

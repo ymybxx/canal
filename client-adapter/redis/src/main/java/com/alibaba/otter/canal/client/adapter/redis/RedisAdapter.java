@@ -3,9 +3,11 @@ package com.alibaba.otter.canal.client.adapter.redis;
 import com.alibaba.otter.canal.client.adapter.OuterAdapter;
 import com.alibaba.otter.canal.client.adapter.redis.config.RedisConfigLoader;
 import com.alibaba.otter.canal.client.adapter.redis.config.RedisMappingConfig;
+import com.alibaba.otter.canal.client.adapter.redis.service.RedisEtlService;
 import com.alibaba.otter.canal.client.adapter.redis.service.RedisService;
 import com.alibaba.otter.canal.client.adapter.redis.service.RedisSyncService;
 import com.alibaba.otter.canal.client.adapter.support.Dml;
+import com.alibaba.otter.canal.client.adapter.support.EtlResult;
 import com.alibaba.otter.canal.client.adapter.support.OuterAdapterConfig;
 import com.alibaba.otter.canal.client.adapter.support.SPI;
 import java.util.List;
@@ -117,5 +119,59 @@ public class RedisAdapter implements OuterAdapter {
         if (redisService != null) {
             redisService.close();
         }
+    }
+
+    /**
+     * Etl操作
+     *
+     * @param task 任务名, 对应配置名
+     * @param params etl筛选条件
+     */
+    @Override
+    public EtlResult etl(String task, List<String> params) {
+        EtlResult etlResult = new EtlResult();
+        RedisMappingConfig config = redisMapping.get(task);
+        RedisEtlService redisEtlService = new RedisEtlService(redisService, config);
+        if (config != null) {
+            return redisEtlService.importData(params);
+        } else {
+            StringBuilder resultMsg = new StringBuilder();
+            boolean resSucc = true;
+            for (RedisMappingConfig configTmp : redisMapping.values()) {
+                // 取所有的destination为task的配置
+                if (configTmp.getDestination().equals(task)) {
+                    EtlResult etlRes = redisEtlService.importData(params);
+                    if (!etlRes.getSucceeded()) {
+                        resSucc = false;
+                        resultMsg.append(etlRes.getErrorMessage()).append("\n");
+                    } else {
+                        resultMsg.append(etlRes.getResultMessage()).append("\n");
+                    }
+                }
+            }
+            if (resultMsg.length() > 0) {
+                etlResult.setSucceeded(resSucc);
+                if (resSucc) {
+                    etlResult.setResultMessage(resultMsg.toString());
+                } else {
+                    etlResult.setErrorMessage(resultMsg.toString());
+                }
+                return etlResult;
+            }
+        }
+        etlResult.setSucceeded(false);
+        etlResult.setErrorMessage("Task not found");
+        return etlResult;
+    }
+
+    /**
+     * 计算总数
+     *
+     * @param task 任务名, 对应配置名
+     * @return 总数
+     */
+    @Override
+    public Map<String, Object> count(String task) {
+        return OuterAdapter.super.count(task);
     }
 }

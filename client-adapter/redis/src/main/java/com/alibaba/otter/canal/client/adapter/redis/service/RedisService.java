@@ -1,10 +1,13 @@
 package com.alibaba.otter.canal.client.adapter.redis.service;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.redisson.Redisson;
+import org.redisson.api.RBatch;
 import org.redisson.api.RBucket;
+import org.redisson.api.RBucketAsync;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
 import org.redisson.codec.JsonJacksonCodec;
@@ -67,5 +70,14 @@ public class RedisService {
     public boolean delete(String key) {
         RBucket<String> bucket = redissonClient.getBucket(key);
         return bucket.delete();
+    }
+
+    public void batchUpdate(Map<String, String> dataMap) {
+        RBatch rBatch = redissonClient.createBatch();
+        for (Entry<String, String> entry : dataMap.entrySet()) {
+            RBucketAsync<Object> bucket = rBatch.getBucket(entry.getKey());
+            bucket.setAsync(entry.getValue());
+        }
+        rBatch.execute();
     }
 }
