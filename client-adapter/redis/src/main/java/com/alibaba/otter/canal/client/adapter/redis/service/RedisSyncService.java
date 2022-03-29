@@ -4,14 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.otter.canal.client.adapter.redis.config.RedisMappingConfig;
 import com.alibaba.otter.canal.client.adapter.redis.support.SyncUtil;
 import com.alibaba.otter.canal.client.adapter.support.Dml;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 public class RedisSyncService {
 
@@ -33,42 +29,12 @@ public class RedisSyncService {
 
             Map<String, String> dataMap = new HashMap<>();
 
-            String pk = redisMapping.getPk();
-            List<String> pkList = Arrays.asList(pk.split(","));
-            if (CollectionUtils.isEmpty(pkList)) {
-                logger.warn("pk can not be null");
-                return;
-            }
-
-            String nameSpace = redisMapping.getNamespace();
-            if (CollectionUtils.isEmpty(pkList)) {
-                logger.warn("nameSpace can not be null");
-                return;
-            }
-
             String key = redisMapping.getKey();
-            if (SyncUtil.searchCount(key, "{}") != pkList.size()) {
-                logger.warn("pk num don't match the key num");
-                return;
-            }
-
             dml.getData().forEach((value) -> {
-                List<String> keyList = new ArrayList<>();
-                for (String currentPk : pkList) {
-                    Object pkValue = value.get(currentPk);
-                    if (pkValue == null && currentPk != null) {
-                        logger.warn("The pk value is not available: `{}`.`{}` column: {}",
-                                redisMapping.getDatabase(), redisMapping.getTable(), currentPk);
-                        return;
-                    }
-
-                    keyList.add(String.valueOf(pkValue));
-                }
-                String resultKey = SyncUtil.replaceStr(key, "{}", keyList);
-                resultKey = nameSpace + ":" + resultKey;
+                String resultKey = SyncUtil.replaceStr(key, value);
                 Map<String, Object> values = new HashMap<>();
-                SyncUtil.getColumnsMap(redisMapping, value)
-                        .forEach((targetColumn, srcColumn) -> values
+                SyncUtil.getColumnsMap(redisMapping)
+                        .forEach((srcColumn, targetColumn) -> values
                                 .put(targetColumn, value.get(srcColumn)));
 
                 String jsonString = JSON.toJSONString(values);
@@ -85,7 +51,6 @@ public class RedisSyncService {
     }
 
     private void update(Map<String, String> dataMap, int expire) {
-        //TODO 批量处理优化
         dataMap.forEach((key, value) -> {
             Object result;
             result = redisService.set(key, value, (long) expire);

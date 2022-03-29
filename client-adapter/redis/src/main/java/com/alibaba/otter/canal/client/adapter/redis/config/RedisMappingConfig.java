@@ -71,11 +71,10 @@ public class RedisMappingConfig implements AdapterConfig {
 
         if (redisMapping.key == null || redisMapping.key.isEmpty()) {
             throw new NullPointerException("redisMapping.key");
-        } else {
-            if (redisMapping.key.contains("{}") && (redisMapping.pk == null || redisMapping.pk
-                    .isEmpty())) {
-                throw new NullPointerException("redisMapping.pk");
-            }
+        }
+
+        if (StringUtils.isBlank(redisMapping.sql)) {
+            throw new NullPointerException("redisMapping.sql");
         }
     }
 
@@ -83,14 +82,11 @@ public class RedisMappingConfig implements AdapterConfig {
 
         private String database;                            // 数据库名或schema名
         private String table;                               // 表名
-        private String namespace;                           // 命名空间
         private String sql;
+        private Boolean lineToHump = false;
         private String pk = null;                           // 主键名
         private String key;                                 // key
-        private String dataType = "string";                 // 数据类型
         private int expire;                                 // 过期时间
-        private boolean mapAll = false;                     // 映射所有字段
-        private Map<String, String> targetColumns;          // 目标表字段映射
 
         private String etlCondition;                        // etl条件sql
 
@@ -112,14 +108,6 @@ public class RedisMappingConfig implements AdapterConfig {
             this.table = table;
         }
 
-        public String getNamespace() {
-            return namespace;
-        }
-
-        public void setNamespace(String namespace) {
-            this.namespace = namespace;
-        }
-
         public String getSql() {
             return sql;
         }
@@ -128,27 +116,12 @@ public class RedisMappingConfig implements AdapterConfig {
             this.sql = sql;
         }
 
-        public Boolean getMapAll() {
-            return mapAll;
+        public Boolean getLineToHump() {
+            return lineToHump;
         }
 
-        public void setMapAll(Boolean mapAll) {
-            this.mapAll = mapAll;
-        }
-
-        public Map<String, String> getTargetColumns() {
-            if (targetColumns != null) {
-                targetColumns.forEach((key, value) -> {
-                    if (StringUtils.isEmpty(value)) {
-                        targetColumns.put(key, key);
-                    }
-                });
-            }
-            return targetColumns;
-        }
-
-        public void setTargetColumns(Map<String, String> targetColumns) {
-            this.targetColumns = targetColumns;
+        public void setLineToHump(Boolean lineToHump) {
+            this.lineToHump = lineToHump;
         }
 
         public String getEtlCondition() {
@@ -189,14 +162,6 @@ public class RedisMappingConfig implements AdapterConfig {
 
         public void setExpire(int expire) {
             this.expire = expire;
-        }
-
-        public String getDataType() {
-            return dataType;
-        }
-
-        public void setDataType(String dataType) {
-            this.dataType = dataType;
         }
     }
 }

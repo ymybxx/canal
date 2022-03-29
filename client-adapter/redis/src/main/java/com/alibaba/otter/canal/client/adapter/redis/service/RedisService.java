@@ -34,6 +34,7 @@ public class RedisService {
         if (isCluster) {
             ClusterServersConfig clusterServersConfig = config.useClusterServers();
             clusterServersConfig.addNodeAddress(hosts.split(","));
+            clusterServersConfig.setPassword(password);
         } else {
             /**
              * todo ssl链接 timeout dataBase选择

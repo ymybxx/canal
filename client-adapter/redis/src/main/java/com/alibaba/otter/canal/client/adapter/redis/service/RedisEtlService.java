@@ -46,17 +46,7 @@ public class RedisEtlService extends AbstractEtlService {
                     return false;
                 }
 
-                String nameSpace = redisMapping.getNamespace();
-                if (CollectionUtils.isEmpty(pkList)) {
-                    logger.warn("nameSpace can not be null");
-                    return false;
-                }
-
                 String key = redisMapping.getKey();
-                if (SyncUtil.searchCount(key, "{}") != pkList.size()) {
-                    logger.warn("pk num don't match the key num");
-                    return false;
-                }
 
                 Map<String, String> dataMap = new HashMap<>();
                 while (true) {
@@ -65,32 +55,16 @@ public class RedisEtlService extends AbstractEtlService {
                             break;
                         }
 
-                        List<String> keyList = new ArrayList<>();
-                        for (String currentPk : pkList) {
-                            String pkValue = rs.getString(currentPk);
-                            if (pkValue == null && currentPk != null) {
-                                logger.warn("The pk value is not available: `{}`.`{}` column: {}",
-                                        redisMapping.getDatabase(), redisMapping.getTable(),
-                                        currentPk);
-                                return false;
-                            }
+                        String resultKey = SyncUtil.replaceStr(key, rs);
 
-                            keyList.add(String.valueOf(pkValue));
-                        }
-                        String resultKey = SyncUtil.replaceStr(key, "{}", keyList);
-                        resultKey = nameSpace + ":" + resultKey;
-
-                        List<String> allColumn = getAllColumn(rs);
                         Map<String, Object> jsonMap = new HashMap<>();
-                        SyncUtil.getColumnsMap(redisMapping, allColumn)
-                                .forEach((targetColumn, srcColumn) -> {
-                                    try {
-                                        jsonMap
-                                                .put(targetColumn, rs.getObject(srcColumn));
-                                    } catch (SQLException throwables) {
-                                        throwables.printStackTrace();
-                                    }
-                                });
+                        SyncUtil.getColumnsMap(redisMapping).forEach((srcColumn, targetColumn) -> {
+                            try {
+                                jsonMap.put(targetColumn, rs.getObject(srcColumn));
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        });
 
                         String jsonString = JSON.toJSONString(jsonMap);
                         dataMap.put(resultKey, jsonString);

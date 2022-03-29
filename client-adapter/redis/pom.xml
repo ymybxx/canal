@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>canal.client-adapter</artifactId>
     <groupId>com.alibaba.otter</groupId>
@@ -31,6 +33,12 @@
       <version>3.0.1</version>
       <type>jar</type>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -67,7 +75,7 @@
               <tasks>
                 <copy todir="${project.basedir}/../launcher/target/classes/redis" overwrite="true">
                   <fileset dir="${project.basedir}/target/classes/redis" erroronmissingdir="true">
-                    <include name="*.yml" />
+                    <include name="*.yml"/>
                   </fileset>
                 </copy>
               </tasks>

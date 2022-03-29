@@ -4,13 +4,9 @@ groupId: canal-adapter-ba
 redisMapping:
   database: posting
   table: post
-  namespace: post # 会作为key的前缀, etl会根据该值清除 namespace:开头的数据
-  key: "posts:{}-{}" # 此处的 {} 会被替换为下面的 pk 对应的值,
-  pk: id,channel
+  key: "posts:{id}-{channel}" # 此处的 {} 会被替换为下面的 pk 对应的值,
+  pk: id
   expire: -1
   sql: "select id, channel, post_type, title, author_id, video_url, video_width, video_height, img_urls, ref_course_ids, ref_merchant_ids, like_count, comment_count, share_count, publish_state, operate_user_id, source_id, unique_id, ins_tm, upd_tm, collect_count, view_count, cover_img, cover_video, cover_width, cover_height, operate_score, publish_tm, city_ids, visit_merchant_id, rich_text, tag_ids, author_source_id, top from post"
-  #  mapAll: true
-  targetColumns:
-    id:
-    title:
+  lineToHump: true
   etlCondition: "where upd_tm>={}"
